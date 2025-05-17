@@ -2,19 +2,28 @@
 require_once '../app/core/Controller.php';
 
 class AuthController extends Controller {
+
+    
     public function loginView() {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+    
+        if (isset($_SESSION['user_id'])) {
+            header("Location: /index.php?url=events/index");
+            exit();
+        }
+    
         if (empty($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
-        
+    
         $this->view('auth/login', [
             'loginUrl' => '/auth/login',
             'loginActionUrl' => '/auth/login'
         ]);
     }
+    
     
     public function registerView() {
         if (session_status() === PHP_SESSION_NONE) {
@@ -25,8 +34,8 @@ class AuthController extends Controller {
         }
         
         $this->view('auth/register', [
-            'registerActionUrl' => '/auth/register',
-            'loginUrl' => '/auth/login'
+            'registerActionUrl' => 'auth/register',
+            'loginUrl' => 'auth/login'
         ]);
     }
 
@@ -56,8 +65,8 @@ class AuthController extends Controller {
             } else {
                 $userModel = $this->model('User');
                 if ($userModel->login($email, $password)) {
-                    header("Location: /event/index");
-                    exit;
+                    header("Location: /index.php?url=events/index");
+                    exit();
                 } else {
                     $error = "Invalid credentials.";
                 }
@@ -107,7 +116,7 @@ class AuthController extends Controller {
             
             // Make sure to pass parameters in correct order
             if ($userModel->register($name, $email, $hashedPassword)) {
-                header("Location: /auth/login");
+                header("Location: /index.php?url=auth/login");
                 exit;
             } else {
                 $error = "Registration failed. Email may already be in use.";

@@ -146,7 +146,7 @@ if (session_status() === PHP_SESSION_NONE) {
         </form>
 
         <div class="login-link">
-            Already have an account? <a href="<?= htmlspecialchars($loginUrl ?? '/auth/login', ENT_QUOTES, 'UTF-8') ?>">Login</a>
+            Already have an account? <a href="/?url=auth/login">Login</a>
         </div>
     </div>
 

@@ -1,32 +1,55 @@
 <?php
 class Router {
+    
     protected $routes = [
         'GET' => [
             'auth/login' => ['AuthController', 'loginView'],
             'auth/register' => ['AuthController', 'registerView'],
+            'events' => ['EventController', 'indexView'],        // Main events listing
+            'events/index' => ['EventController', 'indexView'],  // Alternative
             'events/create' => ['EventController', 'createView'],
-            'tickets/book' => ['TicketController', 'bookView'],
-            'tickets/confirmation' => ['TicketController', 'confirmationView'],
-            '' => ['AuthController', 'loginView'],
+            'events/view/:id' => ['EventController', 'viewEvent'],
+            '' => ['AuthController', 'loginView'],               // Default route
         ],
         'POST' => [
             'auth/login' => ['AuthController', 'login'],
             'auth/register' => ['AuthController', 'register'],
+            'events/create' => ['EventController', 'create'],
         ]
     ];
 
+    public function __construct() {
+        // Load base Controller
+        require_once 'Controller.php';
+    }
+
     public function route(): void {
         $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $url = $_GET['url'] ?? '';
+        $url = $this->sanitizeUrl($_GET['url'] ?? '');
         $url = rtrim($url, '/');
-
+    
+        // 1. First check exact matches
         if (isset($this->routes[$requestMethod][$url])) {
             [$controllerName, $method] = $this->routes[$requestMethod][$url];
             $this->callController($controllerName, $method);
             return;
         }
-
-        // Dynamic routing fallback
+    
+        // 2. Check parameterized routes
+        foreach ($this->routes[$requestMethod] as $route => $handler) {
+            if (strpos($route, ':') !== false) {
+                $pattern = preg_replace('/:[^\/]+/', '([^\/]+)', $route);
+                $pattern = str_replace('/', '\/', $pattern);
+                if (preg_match("@^{$pattern}$@", $url, $matches)) {
+                    [$controllerName, $method] = $handler;
+                    $params = array_slice($matches, 1);
+                    $this->callController($controllerName, $method, $params);
+                    return;
+                }
+            }
+        }
+    
+        // 3. Fallback to dynamic routing if enabled
         $urlParts = explode('/', $url);
         if (count($urlParts) >= 2) {
             $controllerName = ucfirst($urlParts[0]) . 'Controller';
@@ -41,7 +64,8 @@ class Router {
     }
 
     protected function callController(string $controllerName, string $method, array $params = []): void {
-        $controllerFile = "../app/controllers/$controllerName.php";
+        $controllerFile = __DIR__ . "/../controllers/$controllerName.php";
+        
         if (file_exists($controllerFile)) {
             require_once $controllerFile;
             
@@ -49,7 +73,9 @@ class Router {
                 $controller = new $controllerName();
                 
                 if (method_exists($controller, $method)) {
-                    call_user_func_array([$controller, $method], $params);
+                    // Sanitize parameters before passing to controller
+                    $sanitizedParams = array_map([$this, 'sanitizeInput'], $params);
+                    call_user_func_array([$controller, $method], $sanitizedParams);
                     return;
                 }
             }
@@ -60,7 +86,7 @@ class Router {
 
     protected function notFound(): void {
         http_response_code(404);
-        $errorView = "../app/views/errors/404.php";
+        $errorView = __DIR__ . "/../views/errors/404.php";
         
         if (file_exists($errorView)) {
             require_once $errorView;
@@ -68,5 +94,13 @@ class Router {
             echo "404 Not Found";
         }
         exit;
+    }
+
+    protected function sanitizeUrl(string $url): string {
+        return filter_var($url, FILTER_SANITIZE_URL);
+    }
+
+    protected function sanitizeInput($input): string {
+        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 }
