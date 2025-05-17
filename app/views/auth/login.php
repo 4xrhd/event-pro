@@ -158,7 +158,7 @@
                 </div>
             <?php endif; ?>
 
-            <form method="POST" action="/auth/login" autocomplete="on">
+            <form method="POST" action="/index.php?url=auth/login" autocomplete="on">
                 <div class="form-group">
                     <label for="email">Email Address</label>
                     <input 
@@ -188,7 +188,8 @@
             </form>
 
             <div class="additional-links">
-                Don't have an account? <a href="/auth/register">Sign up</a>
+                Don't have an account? <a href="index.php?url=auth/register">Sign Up</a>
+
             </div>
         </div>
     </div>

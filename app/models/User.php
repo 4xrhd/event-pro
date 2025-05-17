@@ -1,4 +1,7 @@
 <?php
+// Report all MySQLi errors
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
 class User {
     private $db;
 
@@ -15,17 +18,16 @@ class User {
         return $result && password_verify($password, $result['password']);
     }
 
-    public function register($email, $passwordHash) {
-        // Check if user already exists
-        $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        if ($stmt->get_result()->num_rows > 0) {
-            return false;
-        }
-
-        $stmt = $this->db->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
-        $stmt->bind_param("ss", $email, $passwordHash);
-        return $stmt->execute();
+   public function register($name, $email, $password) {
+    // Check if email already exists
+    $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    if ($stmt->fetch()) {
+        return false;
     }
+
+    // Insert new user
+    $stmt = $this->db->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
+    return $stmt->execute([$name, $email, $password]);
+}
 }

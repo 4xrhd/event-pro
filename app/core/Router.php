@@ -1,64 +1,52 @@
 <?php
-// app/core/Router.php
-
 class Router {
     protected $routes = [
-        // Auth routes
-        'auth/login'      => ['AuthController', 'login'],
-        'auth/register'   => ['AuthController', 'register'],
-        'auth/logout'     => ['AuthController', 'logout'],
-
-        // Event routes
-        'events'          => ['EventController', 'index'],
-        'events/create'   => ['EventController', 'create'],
-        'events/show'     => ['EventController', 'show'],
-        'events/edit'    => ['EventController', 'edit'],
-        'events/delete'   => ['EventController', 'delete'],
-
-        // Ticket routes
-        'tickets'         => ['TicketController', 'index'],
-        'tickets/book'    => ['TicketController', 'book'],
-        'tickets/view'   => ['TicketController', 'view'],
-
-        // Default route
-        ''                => ['AuthController', 'login'],
+        'GET' => [
+            'auth/login' => ['AuthController', 'loginView'],
+            'auth/register' => ['AuthController', 'registerView'],
+            'events/create' => ['EventController', 'createView'],
+            'tickets/book' => ['TicketController', 'bookView'],
+            'tickets/confirmation' => ['TicketController', 'confirmationView'],
+            '' => ['AuthController', 'loginView'],
+        ],
+        'POST' => [
+            'auth/login' => ['AuthController', 'login'],
+            'auth/register' => ['AuthController', 'register'],
+        ]
     ];
 
-    public function __construct() {
-        $this->initialize();
-    }
+    public function route(): void {
+        $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        $url = $_GET['url'] ?? '';
+        $url = rtrim($url, '/');
 
-    protected function initialize() {
-        // You could add route registration methods here if needed
-    }
-
-    public function route() {
-        $url = $this->getUrl();
-        
-        // Check defined routes first
-        if (isset($this->routes[$url])) {
-            $this->dispatch($this->routes[$url]);
+        if (isset($this->routes[$requestMethod][$url])) {
+            [$controllerName, $method] = $this->routes[$requestMethod][$url];
+            $this->callController($controllerName, $method);
             return;
         }
 
-        // Fallback to dynamic routing
-        $this->dynamicRoute($url);
-    }
-
-    protected function getUrl() {
-        $url = $_GET['url'] ?? '';
-        return rtrim($url, '/');
-    }
-
-    protected function dispatch($routeInfo, $params = []) {
-        [$controllerName, $method] = $routeInfo;
-        $controllerPath = "../app/controllers/$controllerName.php";
+        // Dynamic routing fallback
+        $urlParts = explode('/', $url);
+        if (count($urlParts) >= 2) {
+            $controllerName = ucfirst($urlParts[0]) . 'Controller';
+            $method = $urlParts[1] . ($requestMethod === 'POST' ? '' : 'View');
+            $params = array_slice($urlParts, 2);
+            
+            $this->callController($controllerName, $method, $params);
+            return;
+        }
         
-        if (file_exists($controllerPath)) {
-            require_once $controllerPath;
+        $this->notFound();
+    }
+
+    protected function callController(string $controllerName, string $method, array $params = []): void {
+        $controllerFile = "../app/controllers/$controllerName.php";
+        if (file_exists($controllerFile)) {
+            require_once $controllerFile;
             
             if (class_exists($controllerName)) {
-                $controller = new $controllerName;
+                $controller = new $controllerName();
                 
                 if (method_exists($controller, $method)) {
                     call_user_func_array([$controller, $method], $params);
@@ -70,32 +58,15 @@ class Router {
         $this->notFound();
     }
 
-    protected function dynamicRoute($url) {
-        $urlParts = explode('/', $url);
-        
-        if (count($urlParts) >= 2) {
-            $controllerName = ucfirst($urlParts[0]) . 'Controller';
-            $method = $urlParts[1];
-            $params = array_slice($urlParts, 2);
-            
-            $this->dispatch([$controllerName, $method], $params);
-            return;
-        }
-        
-        $this->notFound();
-    }
-
-    protected function notFound() {
+    protected function notFound(): void {
         http_response_code(404);
+        $errorView = "../app/views/errors/404.php";
         
-        // You could load a custom 404 view here
-        $viewPath = "../app/views/errors/404.php";
-        if (file_exists($viewPath)) {
-            require_once $viewPath;
+        if (file_exists($errorView)) {
+            require_once $errorView;
         } else {
             echo "404 Not Found";
         }
-        
         exit;
     }
 }

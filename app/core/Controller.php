@@ -1,9 +1,21 @@
 <?php
 class Controller {
-    protected function view($view, $data = []) {
+    protected function view($viewPath, $data = []) {
+        // Extract data to variables
         extract($data);
-        require_once "../app/views/$view.php";
+        
+        // Build full path to view
+        $viewFile = "../app/views/$viewPath.php";
+        
+        if (file_exists($viewFile)) {
+            require_once $viewFile;
+        } else {
+            throw new Exception("View file not found: $viewPath");
+        }
     }
+
+
+
 
     protected function model($model) {
         require_once "../app/models/$model.php";
