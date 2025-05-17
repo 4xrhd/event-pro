@@ -64,29 +64,32 @@
     </style>
 </head>
 <body>
-    <div class="event-container">
+<div class="event-container">
     <h1>Upcoming Events</h1>
     <a href="?url=events/create" class="create-btn">Create New Event</a>
-    <a href="?url=events/view/<?= $event['id'] ?? '' ?>" class="book-btn">View Event</a>
-    
 
-        
-        <?php if (!empty($events)): ?>
-            <?php foreach ($events as $event): ?>
-                <div class="event-card">
-                    <h2><?= htmlspecialchars($event['title'] ?? 'Untitled Event') ?></h2>
-                    <p><span class="event-date">Date:</span> <?= date('F j, Y g:i a', strtotime($event['event_date'] ?? '')) ?></p>
-                    <p><span class="event-date">Venue:</span> <?= htmlspecialchars($event['venue'] ?? 'Location not specified') ?></p>
-                    <p><span class="event-price">Price:</span> $<?= number_format($event['price'] ?? 0, 2) ?></p>
-                    <a href="?url=tickets/book&event_id=<?= $event['id'] ?? '' ?>" class="book-btn">Book Tickets</a>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <div class="no-events">
-                <h2>No events found</h2>
-                <p>There are currently no upcoming events. Check back later or create a new event.</p>
+    <?php if (!empty($events)): ?>
+        <?php foreach ($events as $event): ?>
+            <div class="event-card">
+                <h2><?= htmlspecialchars($event['title'] ?? 'Untitled Event') ?></h2>
+                <p><span class="event-date">Date:</span> <?= date('F j, Y g:i a', strtotime($event['event_date'] ?? '')) ?></p>
+                <p><span class="event-date">Venue:</span> <?= htmlspecialchars($event['venue'] ?? 'Location not specified') ?></p>
+                <p><span class="event-price">Price:</span> $<?= number_format($event['price'] ?? 0, 2) ?></p>
+
+                <a href="?url=tickets/book&event_id=<?= $event['id'] ?? '' ?>" class="book-btn">Book Tickets</a>
+
+                <?php if (!empty($event['id'])): ?>
+                    <a href="?url=events/view/<?= $event['id'] ?>" class="book-btn" style="background:#9b59b6;">View Event</a>
+                <?php endif; ?>
             </div>
-        <?php endif; ?>
-    </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <div class="no-events">
+            <h2>No events found</h2>
+            <p>There are currently no upcoming events. Check back later or create a new event.</p>
+        </div>
+    <?php endif; ?>
+</div>
+
 </body>
 </html>

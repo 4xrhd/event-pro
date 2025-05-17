@@ -28,40 +28,39 @@ class EventController extends Controller {
     // Handle form submission (POST)
     public function create() {
         try {
-            // Input validation and sanitization
             $title = trim(htmlspecialchars($_POST['title'] ?? '', ENT_QUOTES, 'UTF-8'));
             $date = $_POST['date'] ?? '';
             $venue = trim(htmlspecialchars($_POST['venue'] ?? '', ENT_QUOTES, 'UTF-8'));
             $price = filter_var($_POST['price'] ?? 0, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-            
-            // Validate inputs
+    
             if (empty($title) || strlen($title) > 255) {
                 throw new Exception('Event title must be between 1-255 characters');
             }
-            
+    
             if (empty($date) || !strtotime($date)) {
                 throw new Exception('Invalid event date');
             }
-            
+    
             if (empty($venue) || strlen($venue) > 255) {
                 throw new Exception('Venue must be between 1-255 characters');
             }
-            
+    
             if ($price <= 0) {
                 throw new Exception('Price must be greater than 0');
             }
-
-            // Convert datetime-local format to MySQL DATETIME
+    
             $formattedDate = date('Y-m-d H:i:s', strtotime($date));
-
+    
+            // ✅ FIX: Initialize the event model before calling create
             $eventModel = $this->model('Event');
+    
             $data = [
                 'title' => $title,
                 'event_date' => $formattedDate,
                 'venue' => $venue,
                 'price' => $price
             ];
-            
+    
             if ($eventModel->create($data)) {
                 $_SESSION['success_message'] = 'Event created successfully!';
                 header('Location: /index.php?url=events');
@@ -73,11 +72,11 @@ class EventController extends Controller {
             error_log($e->getMessage());
             $this->view('events/create', [
                 'error' => $e->getMessage(),
-                'old_input' => $_POST // For form repopulation
+                'old_input' => $_POST
             ]);
         }
     }
-
+    
     public function viewEvent($id) {
         try {
             // Convert to integer if it's a numeric string

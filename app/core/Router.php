@@ -8,6 +8,7 @@ class Router {
             'events' => ['EventController', 'indexView'],        // Main events listing
             'events/index' => ['EventController', 'indexView'],  // Alternative
             'events/create' => ['EventController', 'createView'],
+            'events/view' => ['EventController', 'indexView'],
             'events/view/:id' => ['EventController', 'viewEvent'],
             '' => ['AuthController', 'loginView'],               // Default route
         ],
