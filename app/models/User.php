@@ -11,12 +11,27 @@ class User {
 
     public function login($email, $password) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ?");
+        if (!$stmt) {
+            error_log("Prepare failed: " . $this->db->error);
+            return false;
+        }
         $stmt->bind_param("s", $email);
         $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
-
-        return $result && password_verify($password, $result['password']);
+    
+        // Use get_result() to fetch associative array
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+    
+        if ($user && password_verify($password, $user['password'])) {
+            session_start();
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_name'] = $user['name'];
+            return true;
+        }
+    
+        return false;
     }
+
 
    public function register($name, $email, $password) {
     // Check if email already exists

@@ -5,17 +5,26 @@ class Router {
         'GET' => [
             'auth/login' => ['AuthController', 'loginView'],
             'auth/register' => ['AuthController', 'registerView'],
+            'auth/logout' => ['AuthController', 'logout'],
             'events' => ['EventController', 'indexView'],        // Main events listing
             'events/index' => ['EventController', 'indexView'],  // Alternative
             'events/create' => ['EventController', 'createView'],
+            'events/delete/:id' => ['EventController', 'delete'],
             'events/view' => ['EventController', 'indexView'],
             'events/view/:id' => ['EventController', 'viewEvent'],
+            'tickets/book/:id' => ['TicketController', 'bookView'],
+            'tickets/confirm/:id' => ['TicketController', 'confirmView'],
+            'tickets/download/:id' => ['TicketController', 'download'],
+            'tickets/book/:id' => ['TicketController', 'bookView'],
+            'tickets/confirm/:id' => ['TicketController', 'confirmView'],
+            'tickets/download/:id' => ['TicketController', 'download'],
             '' => ['AuthController', 'loginView'],               // Default route
         ],
         'POST' => [
             'auth/login' => ['AuthController', 'login'],
             'auth/register' => ['AuthController', 'register'],
             'events/create' => ['EventController', 'create'],
+                'tickets/book/:id' => ['TicketController', 'book'], 
         ]
     ];
 
@@ -26,8 +35,7 @@ class Router {
 
     public function route(): void {
         $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $url = $this->sanitizeUrl($_GET['url'] ?? '');
-        $url = rtrim($url, '/');
+        $url = ltrim($this->sanitizeUrl($_GET['url'] ?? ''), '/');
     
         // 1. First check exact matches
         if (isset($this->routes[$requestMethod][$url])) {

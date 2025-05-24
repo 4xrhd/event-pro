@@ -30,4 +30,10 @@ class Event {
         $result = $stmt->get_result();
         return $result->fetch_assoc();
     }
+    public function delete($id) {
+        $stmt = $this->db->prepare("DELETE FROM events WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        return $stmt->execute();
+    }
+    
 }

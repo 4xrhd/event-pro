@@ -42,7 +42,7 @@
     <div class="error-container">
         <h1>404 Not Found</h1>
         <p>The page or event you requested could not be found.</p>
-        <a href="/index.php?url=events/index">Return to Events</a>
+        <a href="/index.php">Return to Index</a>
     </div>
 </body>
 </html>

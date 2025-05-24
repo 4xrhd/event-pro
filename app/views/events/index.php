@@ -61,13 +61,27 @@
             font-weight: bold;
             color: #2ecc71;
         }
+        .delete-btn {
+    display: inline-block;
+    background-color: #e74c3c;
+    color: #fff;
+    padding: 8px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-top: 10px;
+}
+
+.delete-btn:hover {
+    background-color: #c0392b;
+}
+
     </style>
 </head>
 <body>
 <div class="event-container">
     <h1>Upcoming Events</h1>
     <a href="?url=events/create" class="create-btn">Create New Event</a>
-
+    <a href="/index.php?url=auth/logout">Logout</a>
     <?php if (!empty($events)): ?>
         <?php foreach ($events as $event): ?>
             <div class="event-card">
@@ -76,10 +90,11 @@
                 <p><span class="event-date">Venue:</span> <?= htmlspecialchars($event['venue'] ?? 'Location not specified') ?></p>
                 <p><span class="event-price">Price:</span> $<?= number_format($event['price'] ?? 0, 2) ?></p>
 
-                <a href="?url=tickets/book&event_id=<?= $event['id'] ?? '' ?>" class="book-btn">Book Tickets</a>
+                <a href="?url=tickets/book/<?= $event['id'] ?? '' ?>" class="book-btn">Book Tickets</a>
 
                 <?php if (!empty($event['id'])): ?>
                     <a href="?url=events/view/<?= $event['id'] ?>" class="book-btn" style="background:#9b59b6;">View Event</a>
+                    <a href="?url=events/delete/<?= $event['id'] ?>" class="delete-btn" style="background:#e74c3c;" onclick="return confirm('Are you sure you want to delete this event?');">Delete</a>
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>
@@ -90,6 +105,7 @@
         </div>
     <?php endif; ?>
 </div>
+
 
 </body>
 </html>

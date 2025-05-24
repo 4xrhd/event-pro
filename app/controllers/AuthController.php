@@ -9,15 +9,15 @@ class AuthController extends Controller {
             session_start();
         }
     
-        if (isset($_SESSION['user_id'])) {
-            header("Location: /index.php?url=events/index");
-            exit();
-        }
+       
     
         if (empty($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
-    
+        if (isset($_SESSION['user_id'])) {
+            header("Location: /index.php?url=events/index");
+            exit();
+        }
         $this->view('auth/login', [
             'loginUrl' => '/auth/login',
             'loginActionUrl' => '/auth/login'
@@ -48,11 +48,11 @@ class AuthController extends Controller {
             }
             
             // Validate CSRF token
-            // if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
-            //     $error = "Invalid CSRF token";
-            //     $this->view('auth/login', ['error' => $error]);
-            //     return;
-            // }
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
+                $error = "Invalid CSRF token";
+                $this->view('auth/login', ['error' => $error]);
+                return;
+            }
 
             // Input validation
             $email = filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL);
@@ -85,11 +85,11 @@ class AuthController extends Controller {
         }
         
         // Validate CSRF token
-        // if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
-        //     $error = "Invalid CSRF token";
-        //     $this->view('auth/register', ['error' => $error]);
-        //     return;
-        // }
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
+            $error = "Invalid CSRF token";
+            $this->view('auth/register', ['error' => $error]);
+            return;
+        }
 
         // Input validation and sanitization
         $name = trim(filter_var($_POST['name'] ?? '', FILTER_SANITIZE_STRING));
@@ -130,4 +130,26 @@ class AuthController extends Controller {
         'email' => $email ?? ''
     ]);
 }
+public function logout() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    // Clear all session data
+    $_SESSION = [];
+    // Destroy the session cookie (optional but recommended)
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
+    // Destroy the session
+    session_destroy();
+
+    // Redirect to login page or home
+    header("Location: /index.php?url=auth/login");
+    exit();
+}
+
 }

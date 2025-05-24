@@ -78,6 +78,15 @@ class EventController extends Controller {
     }
     
     public function viewEvent($id) {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        if (!isset($_SESSION['user_id'])) {
+            header("Location: /index.php?url=auth/login");
+            exit();
+        }
+        
         try {
             // Convert to integer if it's a numeric string
             $id = is_numeric($id) ? (int)$id : 0;
@@ -101,4 +110,28 @@ class EventController extends Controller {
             $this->notFound();
         }
     }
+    public function delete($id) {
+        try {
+            $id = is_numeric($id) ? (int)$id : 0;
+    
+            if ($id <= 0) {
+                throw new Exception("Invalid event ID");
+            }
+    
+            $eventModel = $this->model('Event');
+            if ($eventModel->delete($id)) {
+                $_SESSION['success_message'] = 'Event deleted successfully!';
+            } else {
+                $_SESSION['error_message'] = 'Failed to delete event.';
+            }
+            header('Location: /index.php?url=events');
+            exit;
+        } catch (Exception $e) {
+            error_log("Delete Error: " . $e->getMessage());
+            $_SESSION['error_message'] = 'An error occurred while deleting the event.';
+            header('Location: /index.php?url=events');
+            exit;
+        }
+    }
+    
 }

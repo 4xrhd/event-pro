@@ -12,10 +12,11 @@ class Ticket {
         $stmt->execute();
         return $this->db->insert_id;
     }
-}
-public function getById($id) {
-    $stmt = $this->db->prepare("SELECT * FROM tickets WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    return $stmt->get_result()->fetch_assoc();
+
+    public function getById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM tickets WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
+    }
 }

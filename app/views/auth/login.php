@@ -159,6 +159,8 @@
             <?php endif; ?>
 
             <form method="POST" action="/index.php?url=auth/login" autocomplete="on">
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+   
                 <div class="form-group">
                     <label for="email">Email Address</label>
                     <input 
