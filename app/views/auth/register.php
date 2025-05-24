@@ -109,6 +109,9 @@ if (session_status() === PHP_SESSION_NONE) {
 </head>
 <body>
     <div class="register-box">
+        <div class="logo">
+            <img src="event-pro.png">
+        </div>
         <h2>Create Account</h2>
 
         <?php if (!empty($error)): ?>

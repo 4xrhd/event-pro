@@ -32,7 +32,6 @@
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 25px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.03);
         }
 
         .event-info h2 {
@@ -71,6 +70,12 @@
             box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
         }
 
+        .total {
+            font-weight: bold;
+            color: #10b981;
+            margin-top: 10px;
+        }
+
         button {
             width: 100%;
             background: #e74c3c;
@@ -85,6 +90,11 @@
 
         button:hover {
             background: #c0392b;
+        }
+
+        .error {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
         }
 
         @media (max-width: 600px) {
@@ -103,10 +113,11 @@
             <h2><?= htmlspecialchars($event['title']) ?></h2>
             <p><strong>Date:</strong> <?= htmlspecialchars($event['event_date']) ?></p>
             <p><strong>Venue:</strong> <?= htmlspecialchars($event['venue']) ?></p>
-            <p><strong>Price:</strong> $<?= htmlspecialchars($event['price']) ?> per ticket</p>
+            <p><strong>Price:</strong> $<span id="unit-price"><?= htmlspecialchars($event['price']) ?></span> per ticket</p>
+            <p class="total">Total: $<span id="total-price"><?= htmlspecialchars($event['price']) ?></span></p>
         </div>
 
-        <form method="POST" action="index.php?url=/tickets/book/<?= $eventId ?>">
+        <form id="booking-form" method="POST" action="index.php?url=/tickets/book/<?= $eventId ?>">
             <div class="form-group">
                 <label for="name">Full Name</label>
                 <input type="text" id="name" name="name" required>
@@ -120,16 +131,46 @@
             <div class="form-group">
                 <label for="quantity">Number of Tickets</label>
                 <select id="quantity" name="quantity" required>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
+                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                        <option value="<?= $i ?>"><?= $i ?></option>
+                    <?php endfor; ?>
                 </select>
             </div>
 
-            <button type="submit">Book Now!</button>
+            <button type="submit">Proceed to Payment</button>
         </form>
     </div>
+
+    <script>
+        const pricePerTicket = parseFloat(document.getElementById("unit-price").innerText);
+        const quantitySelect = document.getElementById("quantity");
+        const totalPriceSpan = document.getElementById("total-price");
+
+        quantitySelect.addEventListener("change", function() {
+            const qty = parseInt(this.value);
+            totalPriceSpan.textContent = (qty * pricePerTicket).toFixed(2);
+        });
+
+        const form = document.getElementById("booking-form");
+        form.addEventListener("submit", function(e) {
+            const nameInput = document.getElementById("name");
+            const emailInput = document.getElementById("email");
+
+            // Simple validation
+            let hasError = false;
+            [nameInput, emailInput].forEach(input => {
+                input.classList.remove("error");
+                if (!input.value.trim()) {
+                    input.classList.add("error");
+                    hasError = true;
+                }
+            });
+
+            if (hasError) {
+                e.preventDefault();
+                alert("Please fill in all required fields.");
+            }
+        });
+    </script>
 </body>
 </html>
