@@ -104,6 +104,11 @@ if (session_status() === PHP_SESSION_NONE) {
             margin-bottom: 1rem;
             font-size: 0.9rem;
         }
+        .logo img{
+            height: 200px;
+            width: 100%;
+            object-fit: contain;
+        }
         /* END OF BLUE CSS STYLES */
     </style>
 </head>

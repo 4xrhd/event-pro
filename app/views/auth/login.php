@@ -145,9 +145,17 @@
                 padding: 1.5rem;
             }
         }
+        .logo img{
+            height: 250px;
+            width: 100%;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
+    <div class="logo">
+            <img src="./event-pro.png">
+        </div>
     <div class="login-container">
         <div class="login-box">
             <h2>Welcome to EventPro</h2>

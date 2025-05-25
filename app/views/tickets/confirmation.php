@@ -82,6 +82,13 @@
 
     <p><strong>QR Code:</strong></p>
     <img src="<?= $qrPath ?>" alt="Ticket QR">
+    
+    <p><strong>Event:</strong> <?= htmlspecialchars($event['title']) ?></p>
+<p><strong>Date:</strong> <?= htmlspecialchars($event['event_date']) ?></p>
+<p><strong>Venue:</strong> <?= htmlspecialchars($event['venue']) ?></p>
+<p><strong>Quantity:</strong> <?= $quantity ?></p>
+<p><strong>Total Paid:</strong> $<?= number_format($total, 2) ?></p>
+
 
     <br>
     <a class="button" href="index.php?url=tickets/download/<?= $ticketId ?>" target="_blank">📄 Download PDF Ticket</a>

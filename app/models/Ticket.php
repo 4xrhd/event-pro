@@ -6,12 +6,13 @@ class Ticket {
         $this->db = new mysqli("localhost", "root", "toor", "eventpro");
     }
 
-    public function create($eventId, $name, $email) {
-        $stmt = $this->db->prepare("INSERT INTO tickets (event_id, name, email) VALUES (?, ?, ?)");
-        $stmt->bind_param("iss", $eventId, $name, $email);
-        $stmt->execute();
-        return $this->db->insert_id;
-    }
+ public function create($eventId, $name, $email, $quantity) {
+    $stmt = $this->db->prepare("INSERT INTO tickets (event_id, name, email, quantity) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("issi", $eventId, $name, $email, $quantity);
+    $stmt->execute();
+    return $this->db->insert_id;
+}
+
 
     public function getById($id) {
         $stmt = $this->db->prepare("SELECT * FROM tickets WHERE id = ?");
