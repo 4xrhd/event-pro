@@ -111,7 +111,7 @@ class TicketController extends Controller {
     $pdf->SetFont('helvetica', 'B', 9);
     $pdf->SetTextColor(0, 0, 0);  // Black
     $pdf->Cell(20, 4, 'Name:', 0, 0);
-    $pdf->SetFont('helvetica', '', 9);
+    $pdf->SetFont('helvetica', '', 7);
     $pdf->SetTextColor(44, 62, 80);  // Dark blue-gray
     $pdf->Cell(50, 4, $ticket['name'], 0, 1);
 
@@ -119,7 +119,7 @@ class TicketController extends Controller {
     $pdf->SetFont('helvetica', 'B', 9);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->Cell(20, 4, 'Email:', 0, 0);
-    $pdf->SetFont('helvetica', '', 9);
+    $pdf->SetFont('helvetica', '', 8);
     $pdf->SetTextColor(44, 62, 80);
     $pdf->Cell(50, 4, $ticket['email'], 0, 1);
 

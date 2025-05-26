@@ -137,7 +137,7 @@
                 </select>
             </div>
 
-            <button type="submit">Proceed to Payment</button>
+            <button type="submit">Book Now</button>
         </form>
     </div>
 

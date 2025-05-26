@@ -8,6 +8,7 @@
             font-family: Arial, sans-serif;
             background: #f8f9fa;
             padding: 30px;
+            position: relative; /* Added for logout button positioning */
         }
 
         .event-details-container {
@@ -49,9 +50,30 @@
         .back-btn:hover {
             background: #0056b3;
         }
+
+        /* Logout button styles */
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: background 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
     </style>
 </head>
 <body>
+
+<!-- Logout button added here -->
+<a href="?url=auth/logout" class="logout-btn">Logout</a>
 
 <div class="event-details-container">
     <h1><?= htmlspecialchars($event['title']) ?></h1>
