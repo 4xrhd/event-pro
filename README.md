@@ -48,7 +48,7 @@ EventPro is a **full-stack web application** designed to streamline event ticket
 ## Contributors
 
 👨‍💻 **Backend Developer**: [ Azhar Uddin](https://github.com/4xrhd)  
-🎨 **UI/UX Designer**: [Sabkun Nahar Alina](https://github.com/username)  
+🎨 **UI/UX Designer**: [Sabkun Nahar Alina](https://github.com/sabikun-nahar-alina)  
 🎨 **UI/UX Designer**: [Alin](https://github.com/username)  
 
 *(Replace the GitHub usernames with actual contributor profiles)*
@@ -59,7 +59,7 @@ EventPro is a **full-stack web application** designed to streamline event ticket
 2. Set up the database (MySQL)
 3. Configure the environment variables
 4. Run the application on a PHP server
-
+`$php -S 127.0.0.1:8080 -t public`
 ---
 
 **EventPro** - Simplifying event management one ticket at a time!
