@@ -48,10 +48,12 @@ EventPro is a **full-stack web application** designed to streamline event ticket
 ## Contributors
 
 👨‍💻 **Backend Developer**: [ Azhar Uddin](https://github.com/4xrhd)  
-🎨 **UI/UX Designer**: [Sabkun Nahar Alina](https://github.com/sabikun-nahar-alina)  
+🎨 **UI/UX Designer**: [Sabkun Nahar Alina](https://github.com/sabikun-nahar-alina) 
 🎨 **UI/UX Designer**: [Alin](https://github.com/username)  
-
-*(Replace the GitHub usernames with actual contributor profiles)*
+<br>
+<a href="https://github.com/4xrhd"><img src="https://avatars.githubusercontent.com/u/65583096?s=96&v=4"> </a>
+<a href="https://github.com/sabikun-nahar-alina"><img src="https://avatars.githubusercontent.com/u/188478942"></a>
+<a href="https://github.com/Alin472"><img src="https://avatars.githubusercontent.com/u/185522545?v=4"> </a>
 
 ## Getting Started
 
