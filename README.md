@@ -47,13 +47,15 @@ EventPro is a **full-stack web application** designed to streamline event ticket
 
 ## Contributors
 
-👨‍💻 **Backend Developer**: [ Azhar Uddin](https://github.com/4xrhd)  
-🎨 **UI/UX Designer**: [Sabkun Nahar Alina](https://github.com/sabikun-nahar-alina) 
-🎨 **UI/UX Designer**: [Alin](https://github.com/username)  
-<br>
-<a href="https://github.com/4xrhd"><img src="https://avatars.githubusercontent.com/u/65583096?s=96&v=4"> </a>
-<a href="https://github.com/sabikun-nahar-alina"><img src="https://avatars.githubusercontent.com/u/188478942"></a>
-<a href="https://github.com/Alin472"><img src="https://avatars.githubusercontent.com/u/185522545?v=4"> </a>
+👨‍💻 **Backend Developer**: [Azhar Uddin](https://github.com/4xrhd)  
+🎨 **UI/UX Designer**: [Sabikun Nahar Alina](https://github.com/sabikun-nahar-alina)  
+🎨 **UI/UX Designer**: [Alin](https://github.com/Alin472)  
+
+<br/>
+
+<a href="https://github.com/4xrhd"><img src="https://avatars.githubusercontent.com/u/65583096?s=96&v=4" width="100"></a>
+<a href="https://github.com/sabikun-nahar-alina"><img src="https://avatars.githubusercontent.com/u/188478942?s=96&v=4" width="100"></a>
+<a href="https://github.com/Alin472"><img src="https://avatars.githubusercontent.com/u/185522545?s=96&v=4" width="100"></a>
 
 ## Getting Started
 
@@ -61,7 +63,11 @@ EventPro is a **full-stack web application** designed to streamline event ticket
 2. Set up the database (MySQL)
 3. Configure the environment variables
 4. Run the application on a PHP server
-`$php -S 127.0.0.1:8080 -t public`
+
+```bash
+$ php -S 127.0.0.1:8080 -t public
+```
+
 ---
 
 **EventPro** - Simplifying event management one ticket at a time!
