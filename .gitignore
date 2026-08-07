@@ -1,0 +1,8 @@
+vendor/
+logs/
+public/qrcodes/
+.codex
+.qwen/
+scratch/
+.DS_Store
+*.log

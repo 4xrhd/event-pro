@@ -5,7 +5,7 @@ class Controller {
         extract($data);
         
         // Build full path to view
-        $viewFile = "../app/views/$viewPath.php";
+        $viewFile = __DIR__ . "/../views/$viewPath.php";
         
         if (file_exists($viewFile)) {
             require_once $viewFile;
@@ -18,12 +18,16 @@ class Controller {
 
 
     protected function model($model) {
-        require_once "../app/models/$model.php";
+        $modelFile = __DIR__ . "/../models/$model.php";
+        if (!file_exists($modelFile)) {
+            throw new Exception("Model file not found: $model");
+        }
+        require_once $modelFile;
         return new $model();
     }
     protected function notFound() {
         http_response_code(404);
-        $errorView = "../app/views/errors/404.php";
+        $errorView = __DIR__ . "/../views/errors/404.php";
         
         if (file_exists($errorView)) {
             require_once $errorView;

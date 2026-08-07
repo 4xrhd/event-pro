@@ -11,10 +11,19 @@ class Autoloader {
     }
 
     protected function loadClass($className) {
-        $file = $this->baseDir . '/' . str_replace('\\', '/', $className) . '.php';
-        if (file_exists($file)) {
-            require_once $file;
-            return true;
+        $normalized = str_replace('\\', '/', $className);
+        $searchPaths = [
+            $this->baseDir . '/' . $normalized . '.php',
+            $this->baseDir . '/app/core/' . $normalized . '.php',
+            $this->baseDir . '/app/controllers/' . $normalized . '.php',
+            $this->baseDir . '/app/models/' . $normalized . '.php',
+        ];
+
+        foreach ($searchPaths as $file) {
+            if (file_exists($file)) {
+                require_once $file;
+                return true;
+            }
         }
         return false;
     }

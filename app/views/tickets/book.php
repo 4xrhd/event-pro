@@ -1,176 +1,80 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Tickets - EventPro</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f8;
-            margin: 0;
-            padding: 0;
-        }
+<?php
+require_once APP_ROOT . '/app/views/layout.php';
+renderHeader('Book Tickets');
+?>
 
-        .booking-container {
-            max-width: 600px;
-            margin: 60px auto;
-            padding: 30px;
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.05);
-        }
+<div class="form-card" style="max-width: 580px;">
+    <h1 class="page-title" style="text-align: center; margin-bottom: 1rem;">🎫 Book Tickets</h1>
 
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .event-info {
-            background: #eef2f7;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-        }
-
-        .event-info h2 {
-            margin: 0 0 10px;
-            color: #2c3e50;
-        }
-
-        .event-info p {
-            margin: 5px 0;
-            color: #555;
-        }
-
-        .form-group {
-            margin-bottom: 1.2rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: #444;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ccd6dd;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
-        }
-
-        .total {
-            font-weight: bold;
-            color: #10b981;
-            margin-top: 10px;
-        }
-
-        button {
-            width: 100%;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 0.85rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.3s ease;
-        }
-
-        button:hover {
-            background: #c0392b;
-        }
-
-        .error {
-            border-color: #e74c3c;
-            box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
-        }
-
-        @media (max-width: 600px) {
-            .booking-container {
-                margin: 30px 15px;
-                padding: 20px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="booking-container">
-        <h1>🎫 Book Tickets</h1>
-
-        <div class="event-info">
-            <h2><?= htmlspecialchars($event['title']) ?></h2>
-            <p><strong>Date:</strong> <?= htmlspecialchars($event['event_date']) ?></p>
-            <p><strong>Venue:</strong> <?= htmlspecialchars($event['venue']) ?></p>
-            <p><strong>Price:</strong> $<span id="unit-price"><?= htmlspecialchars($event['price']) ?></span> per ticket</p>
-            <p class="total">Total: $<span id="total-price"><?= htmlspecialchars($event['price']) ?></span></p>
+    <?php if (!empty($error)): ?>
+        <div class="alert alert-danger">
+            ⚠️ <?= htmlspecialchars($error) ?>
         </div>
+    <?php endif; ?>
 
-        <form id="booking-form" method="POST" action="index.php?url=/tickets/book/<?= $eventId ?>">
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="quantity">Number of Tickets</label>
-                <select id="quantity" name="quantity" required>
-                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                        <option value="<?= $i ?>"><?= $i ?></option>
-                    <?php endfor; ?>
-                </select>
-            </div>
-
-            <button type="submit">Book Now</button>
-        </form>
+    <div style="background: var(--primary-light); padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border: 1px solid #c7d2fe;">
+        <h3 style="color: var(--primary); font-size: 1.15rem; margin-bottom: 0.5rem;"><?= htmlspecialchars($event['title']) ?></h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.25rem;">📅 <strong>Date:</strong> <?= date('F j, Y \a\t g:i a', strtotime($event['event_date'])) ?></p>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.25rem;">📍 <strong>Venue:</strong> <?= htmlspecialchars($event['venue']) ?></p>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">💵 <strong>Price:</strong> $<span id="unit-price"><?= number_format($event['price'], 2) ?></span> per ticket</p>
+        
+        <?php if ($remaining !== null): ?>
+            <p style="font-size: 0.85rem; font-weight: 600; color: #b45309;">⚠️ Remaining Capacity: <?= $remaining ?> ticket(s)</p>
+        <?php endif; ?>
     </div>
 
-    <script>
-        const pricePerTicket = parseFloat(document.getElementById("unit-price").innerText);
+    <form id="booking-form" method="POST" action="<?= url('tickets/book/' . (int) $eventId) ?>">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+
+        <div class="form-group">
+            <label for="name" class="form-label">Full Name *</label>
+            <input type="text" id="name" name="name" class="form-control" required placeholder="John Doe"
+                   value="<?= htmlspecialchars($oldInput['name'] ?? ($_SESSION['user_name'] ?? '')) ?>">
+        </div>
+
+        <div class="form-group">
+            <label for="email" class="form-label">Email Address *</label>
+            <input type="email" id="email" name="email" class="form-control" required placeholder="john@example.com"
+                   value="<?= htmlspecialchars($oldInput['email'] ?? '') ?>">
+        </div>
+
+        <div class="form-group">
+            <label for="quantity" class="form-label">Number of Tickets *</label>
+            <select id="quantity" name="quantity" class="form-control" required>
+                <?php 
+                    $maxQty = $remaining !== null ? min(10, $remaining) : 10;
+                    $maxQty = max(1, $maxQty);
+                    for ($i = 1; $i <= $maxQty; $i++): 
+                ?>
+                    <option value="<?= $i ?>" <?= (int) ($oldInput['quantity'] ?? 1) === $i ? 'selected' : '' ?>><?= $i ?> ticket<?= $i > 1 ? 's' : '' ?></option>
+                <?php endfor; ?>
+            </select>
+        </div>
+
+        <div style="background: #f1f5f9; padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 600; color: var(--text-main);">Total Amount:</span>
+            <span style="font-size: 1.35rem; font-weight: 700; color: var(--success);">$<span id="total-price"><?= number_format((float) ($event['price'] ?? 0) * (int) ($oldInput['quantity'] ?? 1), 2) ?></span></span>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Confirm & Generate Ticket</button>
+            <a href="<?= url('events') ?>" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const unitPriceStr = document.getElementById("unit-price").innerText.replace(/,/g, '');
+        const pricePerTicket = parseFloat(unitPriceStr) || 0;
         const quantitySelect = document.getElementById("quantity");
         const totalPriceSpan = document.getElementById("total-price");
 
         quantitySelect.addEventListener("change", function() {
-            const qty = parseInt(this.value);
+            const qty = parseInt(this.value) || 1;
             totalPriceSpan.textContent = (qty * pricePerTicket).toFixed(2);
         });
+    });
+</script>
 
-        const form = document.getElementById("booking-form");
-        form.addEventListener("submit", function(e) {
-            const nameInput = document.getElementById("name");
-            const emailInput = document.getElementById("email");
-
-            // Simple validation
-            let hasError = false;
-            [nameInput, emailInput].forEach(input => {
-                input.classList.remove("error");
-                if (!input.value.trim()) {
-                    input.classList.add("error");
-                    hasError = true;
-                }
-            });
-
-            if (hasError) {
-                e.preventDefault();
-                alert("Please fill in all required fields.");
-            }
-        });
-    </script>
-</body>
-</html>
+<?php renderFooter(); ?>

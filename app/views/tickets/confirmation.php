@@ -1,108 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Booking Confirmed</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f3f4f6;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+<?php
+require_once APP_ROOT . '/app/views/layout.php';
+renderHeader('Booking Confirmed');
+?>
 
-        .confirmation-box {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.1);
-            width: 400px;
-            text-align: center;
-        }
+<div class="form-card" style="max-width: 520px; text-align: center;">
+    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
+    <h1 class="page-title" style="color: var(--success); margin-bottom: 0.5rem;">Ticket Confirmed!</h1>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Your booking was successful. Below is your official ticket details and QR code.</p>
 
-        h2 {
-            color: #10b981;
-            margin-bottom: 1rem;
-        }
+    <div style="background: #f8fafc; border: 1px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem; text-align: left;">
+        <div style="text-align: center; margin-bottom: 1.25rem;">
+            <img src="<?= htmlspecialchars($qrPath) ?>" alt="Ticket QR Code" style="width: 160px; height: 160px; border-radius: 8px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Scan this QR code at entry</div>
+        </div>
 
-        p {
-            font-size: 16px;
-            margin: 8px 0;
-        }
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
+            <div><strong>Ticket ID:</strong> #<?= (int) $ticketId ?></div>
+            <div><strong>Attendee:</strong> <?= htmlspecialchars($name) ?></div>
+            <div><strong>Email:</strong> <?= htmlspecialchars($email) ?></div>
+            <div><strong>Event:</strong> <?= htmlspecialchars($event['title']) ?></div>
+            <div><strong>Date:</strong> <?= date('F j, Y \a\t g:i a', strtotime($event['event_date'])) ?></div>
+            <div><strong>Venue:</strong> <?= htmlspecialchars($event['venue']) ?></div>
+            <div><strong>Quantity:</strong> <?= (int) $quantity ?> ticket(s)</div>
+            <div><strong>Total Paid:</strong> <span style="color: var(--success); font-weight: 700;">$<?= number_format($total, 2) ?></span></div>
+        </div>
+    </div>
 
-        img {
-            margin-top: 10px;
-            width: 180px;
-            height: 180px;
-        }
-
-        a.button {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: #3b82f6;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            transition: background 0.3s;
-        }
-
-        a.button:hover {
-            background: #2563eb;
-        }
-
-        #toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #10b981;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        #toast.show {
-            opacity: 1;
-        }
-    </style>
-</head>
-<body>
-<div class="confirmation-box">
-    <h2>🎉 Ticket Confirmed!</h2>
-
-    <p><strong>Name:</strong> <?= htmlspecialchars($name) ?></p>
-    <p><strong>Email:</strong> <?= htmlspecialchars($email) ?></p>
-    <p><strong>Ticket ID:</strong> <?= $ticketId ?></p>
-
-    <p><strong>QR Code:</strong></p>
-    <img src="<?= $qrPath ?>" alt="Ticket QR">
-    
-    <p><strong>Event:</strong> <?= htmlspecialchars($event['title']) ?></p>
-<p><strong>Date:</strong> <?= htmlspecialchars($event['event_date']) ?></p>
-<p><strong>Venue:</strong> <?= htmlspecialchars($event['venue']) ?></p>
-<p><strong>Quantity:</strong> <?= $quantity ?></p>
-<p><strong>Total Paid:</strong> $<?= number_format($total, 2) ?></p>
-
-
-    <br>
-    <a class="button" href="index.php?url=tickets/download/<?= $ticketId ?>" target="_blank">📄 Download PDF Ticket</a>
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <a class="btn btn-primary" href="<?= url('tickets/download/' . (int) $ticketId) ?>" target="_blank">
+            📄 Download Official PDF Ticket
+        </a>
+        <a class="btn btn-secondary" href="<?= url('tickets/my-tickets') ?>">
+            View My Tickets
+        </a>
+    </div>
 </div>
 
-<div id="toast">✅ Ticket generated successfully!</div>
-
-<script>
-    // Show toast on load
-    window.onload = () => {
-        const toast = document.getElementById('toast');
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    };
-</script>
-</body>
-</html>
+<?php renderFooter(); ?>

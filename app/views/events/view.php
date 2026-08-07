@@ -1,100 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title><?= htmlspecialchars($event['title']) ?> - Event Details</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f8f9fa;
-            padding: 30px;
-            position: relative; /* Added for logout button positioning */
-        }
+<?php
+require_once APP_ROOT . '/app/views/layout.php';
+renderHeader(htmlspecialchars($event['title'] ?? 'Event Details'));
+$userRole = getCurrentUserRole();
+$booked = (int) ($event['booked_tickets'] ?? 0);
+$capacity = isset($event['capacity']) && $event['capacity'] !== null ? (int) $event['capacity'] : null;
+$isSoldOut = $capacity !== null && $booked >= $capacity;
+?>
 
-        .event-details-container {
-            max-width: 700px;
-            margin: auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 0 12px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-
-        .event-info {
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .event-info span {
-            font-weight: bold;
-            color: #444;
-        }
-
-        .back-btn {
-            display: inline-block;
-            margin-top: 25px;
-            padding: 10px 18px;
-            background: #007bff;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 6px;
-            transition: background 0.2s ease;
-        }
-
-        .back-btn:hover {
-            background: #0056b3;
-        }
-
-        /* Logout button styles */
-        .logout-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 8px 16px;
-            background: #dc3545;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: background 0.2s ease;
-        }
-
-        .logout-btn:hover {
-            background: #c82333;
-        }
-    </style>
-</head>
-<body>
-
-<!-- Logout button added here -->
-<a href="?url=auth/logout" class="logout-btn">Logout</a>
-
-<div class="event-details-container">
-    <h1><?= htmlspecialchars($event['title']) ?></h1>
-
-    <div class="event-info">
-        <span>Date:</span>
-        <?= date('F j, Y \a\t g:i a', strtotime($event['event_date'])) ?>
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="<?= url('events') ?>" class="btn btn-secondary btn-sm">← Back to Events</a>
     </div>
 
-    <div class="event-info">
-        <span>Venue:</span>
-        <?= htmlspecialchars($event['venue']) ?>
-    </div>
+    <div class="card" style="padding: 2.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
+            <h1 class="page-title"><?= htmlspecialchars($event['title']) ?></h1>
+            <span class="badge badge-price" style="font-size: 1.25rem;">$<?= number_format($event['price'], 2) ?></span>
+        </div>
 
-    <div class="event-info">
-        <span>Price:</span>
-        $<?= number_format($event['price'], 2) ?>
-    </div>
+        <div class="card-meta" style="font-size: 1rem; gap: 0.75rem; margin-bottom: 1.5rem;">
+            <div class="card-meta-item">
+                📅 <strong>Date & Time:</strong> <?= date('F j, Y \a\t g:i a', strtotime($event['event_date'])) ?>
+            </div>
+            <div class="card-meta-item">
+                📍 <strong>Venue:</strong> <?= htmlspecialchars($event['venue']) ?>
+            </div>
+            <div class="card-meta-item">
+                🎟️ <strong>Capacity:</strong> <?= $booked ?> <?= $capacity !== null ? "/ {$capacity} booked" : "tickets booked (Unlimited capacity)" ?>
+                <?php if ($isSoldOut): ?>
+                    <span class="badge badge-danger" style="margin-left: 0.5rem;">Sold Out</span>
+                <?php endif; ?>
+            </div>
+            <div class="card-meta-item">
+                📌 <strong>Status:</strong> 
+                <span class="badge badge-<?= $event['status'] === 'published' ? 'success' : 'warning' ?>">
+                    <?= htmlspecialchars(ucfirst($event['status'])) ?>
+                </span>
+            </div>
+        </div>
 
-    <a class="back-btn" href="?url=events">← Back to Events</a>
+        <?php if (!empty($event['description'])): ?>
+            <div style="border-top: 1px solid var(--border-color); padding-top: 1.5rem; margin-top: 1rem;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-main);">About This Event</h3>
+                <p style="color: var(--text-muted); line-height: 1.7; white-space: pre-line;"><?= htmlspecialchars($event['description']) ?></p>
+            </div>
+        <?php endif; ?>
+
+        <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <?php if (!$isSoldOut): ?>
+                <a href="<?= url('tickets/book/' . $event['id']) ?>" class="btn btn-primary" style="flex: 1;">🎫 Book Tickets Now</a>
+            <?php else: ?>
+                <button class="btn btn-secondary" disabled style="flex: 1; opacity: 0.6;">Sold Out</button>
+            <?php endif; ?>
+
+            <?php if ($userRole === 'admin'): ?>
+                <a href="<?= url('events/edit/' . $event['id']) ?>" class="btn btn-secondary">Edit Event</a>
+            <?php endif; ?>
+        </div>
+    </div>
 </div>
 
-</body>
-</html>
+<?php renderFooter(); ?>

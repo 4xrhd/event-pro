@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 Not Found</title>
+    <title>404 Not Found - EventPro</title>
+    <link rel="icon" type="image/png" href="<?= asset('event-pro.png') ?>">
+    <link rel="shortcut icon" href="<?= asset('favicon.ico') ?>">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,9 +42,10 @@
 </head>
 <body>
     <div class="error-container">
+        <img src="<?= asset('event-pro.png') ?>" alt="EventPro Logo" style="height: 48px; width: auto; object-fit: contain; margin-bottom: 1rem;">
         <h1>404 Not Found</h1>
         <p>The page or event you requested could not be found.</p>
-        <a href="/index.php">Return to Index</a>
+        <a href="<?= url('events') ?>">Return to Home</a>
     </div>
 </body>
 </html>

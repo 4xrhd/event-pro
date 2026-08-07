@@ -1,111 +1,99 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Events - EventPro</title>
-    <style>
-        .event-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .event-card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: transform 0.2s;
-        }
-        .event-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        .create-btn {
-            background: #2ecc71;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            text-decoration: none;
-            display: inline-block;
-            margin-bottom: 20px;
-            transition: background 0.3s;
-        }
-        .create-btn:hover {
-            background: #27ae60;
-        }
-        .book-btn {
-            display: inline-block;
-            background: #3498db;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            text-decoration: none;
-            margin-top: 10px;
-        }
-        .book-btn:hover {
-            background: #2980b9;
-        }
-        .no-events {
-            text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
-        }
-        .event-date {
-            color: #e74c3c;
-            font-weight: bold;
-        }
-        .event-price {
-            font-weight: bold;
-            color: #2ecc71;
-        }
-        .delete-btn {
-    display: inline-block;
-    background-color: #e74c3c;
-    color: #fff;
-    padding: 8px 12px;
-            border-radius: 4px;
-            text-decoration: none;
-            margin-top: 10px;
-}
+<?php
+require_once APP_ROOT . '/app/views/layout.php';
+renderHeader('Upcoming Events');
+$userRole = getCurrentUserRole();
+?>
 
-.delete-btn:hover {
-    background-color: #c0392b;
-}
-
-    </style>
-</head>
-<body>
-<div class="event-container">
-    <h1>Upcoming Events</h1>
-    <a href="?url=events/create" class="create-btn">Create New Event</a>
-    <a href="/index.php?url=auth/logout">Logout</a>
-    <?php if (!empty($events)): ?>
-        <?php foreach ($events as $event): ?>
-            <div class="event-card">
-                <h2><?= htmlspecialchars($event['title'] ?? 'Untitled Event') ?></h2>
-                <p><span class="event-date">Date:</span> <?= date('F j, Y g:i a', strtotime($event['event_date'] ?? '')) ?></p>
-                <p><span class="event-date">Venue:</span> <?= htmlspecialchars($event['venue'] ?? 'Location not specified') ?></p>
-                <p><span class="event-price">Price:</span> $<?= number_format($event['price'] ?? 0, 2) ?></p>
-
-                <a href="?url=tickets/book/<?= $event['id'] ?? '' ?>" class="book-btn">Book Tickets</a>
-
-                <?php if (!empty($event['id'])): ?>
-                    <a href="?url=events/view/<?= $event['id'] ?>" class="book-btn" style="background:#9b59b6;">View Event</a>
-                    <a href="?url=events/delete/<?= $event['id'] ?>" class="delete-btn" style="background:#e74c3c;" onclick="return confirm('Are you sure you want to delete this event?');">Delete</a>
-                <?php endif; ?>
-            </div>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <div class="no-events">
-            <h2>No events found</h2>
-            <p>There are currently no upcoming events. Check back later or create a new event.</p>
-        </div>
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Upcoming Events</h1>
+        <p style="color: var(--text-muted);">Discover and book tickets for upcoming conferences, workshops, and festivals.</p>
+    </div>
+    <?php if ($userRole === 'admin'): ?>
+        <a href="<?= url('events/create') ?>" class="btn btn-primary">➕ Create New Event</a>
     <?php endif; ?>
 </div>
 
+<?php if (!empty($successMessage)): ?>
+    <div class="alert alert-success">
+        ✅ <?= htmlspecialchars($successMessage) ?>
+    </div>
+<?php endif; ?>
 
-</body>
-</html>
+<?php if (!empty($errorMessage)): ?>
+    <div class="alert alert-danger">
+        ⚠️ <?= htmlspecialchars($errorMessage) ?>
+    </div>
+<?php endif; ?>
+
+<?php if (!empty($events)): ?>
+    <div class="grid">
+        <?php foreach ($events as $event): ?>
+            <?php 
+                $booked = (int) ($event['booked_tickets'] ?? 0);
+                $capacity = isset($event['capacity']) && $event['capacity'] !== null ? (int) $event['capacity'] : null;
+                $isSoldOut = $capacity !== null && $booked >= $capacity;
+            ?>
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <h2 class="card-title"><?= htmlspecialchars($event['title'] ?? 'Untitled Event') ?></h2>
+                    <span class="badge badge-price">$<?= number_format($event['price'] ?? 0, 2) ?></span>
+                </div>
+
+                <div class="card-meta">
+                    <div class="card-meta-item">
+                        📅 <strong>Date:</strong> <?= date('F j, Y \a\t g:i a', strtotime($event['event_date'] ?? 'now')) ?>
+                    </div>
+                    <div class="card-meta-item">
+                        📍 <strong>Venue:</strong> <?= htmlspecialchars($event['venue'] ?? 'TBA') ?>
+                    </div>
+                    <div class="card-meta-item">
+                        🎟️ <strong>Tickets Booked:</strong> <?= $booked ?> <?= $capacity !== null ? "/ {$capacity}" : "" ?>
+                        <?php if ($isSoldOut): ?>
+                            <span class="badge badge-danger" style="margin-left: 0.5rem;">Sold Out</span>
+                        <?php elseif ($capacity !== null && ($capacity - $booked) <= 5): ?>
+                            <span class="badge badge-warning" style="margin-left: 0.5rem;">Only <?= ($capacity - $booked) ?> left!</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <?php if (!empty($event['description'])): ?>
+                    <div class="card-body">
+                        <?= htmlspecialchars(mb_strimwidth($event['description'], 0, 120, '...')) ?>
+                    </div>
+                <?php endif; ?>
+
+                <div class="card-footer">
+                    <a href="<?= url('events/view/' . $event['id']) ?>" class="btn btn-sm btn-secondary">Details</a>
+                    
+                    <?php if (!$isSoldOut): ?>
+                        <a href="<?= url('tickets/book/' . $event['id']) ?>" class="btn btn-sm btn-primary">Book Tickets</a>
+                    <?php else: ?>
+                        <button class="btn btn-sm btn-secondary" disabled style="opacity: 0.6; cursor: not-allowed;">Sold Out</button>
+                    <?php endif; ?>
+
+                    <?php if ($userRole === 'admin'): ?>
+                        <a href="<?= url('events/edit/' . $event['id']) ?>" class="btn btn-sm btn-secondary" style="margin-left: auto;">Edit</a>
+                        
+                        <form method="POST" action="<?= url('events/delete/' . $event['id']) ?>" style="display: inline;" 
+                              onsubmit="return confirm('Are you sure you want to delete this event? All associated tickets will be deleted.');">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php else: ?>
+    <div class="empty-state">
+        <img src="<?= asset('event-pro.png') ?>" alt="EventPro Logo" style="height: 60px; width: auto; object-fit: contain; margin-bottom: 1rem; opacity: 0.85;">
+        <h3>No Events Found</h3>
+        <p><?= htmlspecialchars($message ?? 'There are currently no upcoming events.') ?></p>
+        <?php if ($userRole === 'admin'): ?>
+            <a href="<?= url('events/create') ?>" class="btn btn-primary">Create Your First Event</a>
+        <?php endif; ?>
+    </div>
+<?php endif; ?>
+
+<?php renderFooter(); ?>

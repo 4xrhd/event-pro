@@ -3,27 +3,34 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '0'); // Don't show errors to users
 ini_set('log_errors', '1');
-ini_set('error_log', __DIR__.'/../logs/error.log');
+
+$logDirectory = dirname(__DIR__) . '/logs';
+if (!is_dir($logDirectory)) {
+    mkdir($logDirectory, 0775, true);
+}
+ini_set('error_log', $logDirectory . '/error.log');
 
 // Define application constants
 define('APP_ROOT', dirname(__DIR__));
 define('VIEW_PATH', APP_ROOT.'/app/views/');
 
+require_once APP_ROOT . '/config/database.php';
+require_once APP_ROOT . '/app/core/helpers.php';
+
 // Register autoloader
-spl_autoload_register(function ($className) {
-    $file = APP_ROOT.'/'.str_replace('\\', '/', $className).'.php';
-    if (file_exists($file)) {
-        require $file;
-    }
-});
+require_once APP_ROOT . '/app/core/Autoloader.php';
+$autoloader = new Autoloader(APP_ROOT);
+$autoloader->register();
 
 try {
     // Initialize session
     if (session_status() === PHP_SESSION_NONE) {
+        $isHttps = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
         session_start([
-            'cookie_secure' => true,
+            'cookie_secure' => $isHttps,
             'cookie_httponly' => true,
-            'use_strict_mode' => true
+            'use_strict_mode' => true,
+            'cookie_samesite' => 'Lax',
         ]);
     }
 

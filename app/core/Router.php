@@ -3,48 +3,70 @@ class Router {
     
     protected $routes = [
         'GET' => [
+            '' => ['AuthController', 'loginView'],
             'auth/login' => ['AuthController', 'loginView'],
             'auth/register' => ['AuthController', 'registerView'],
             'auth/logout' => ['AuthController', 'logout'],
-            'events' => ['EventController', 'indexView'],        // Main events listing
-            'events/index' => ['EventController', 'indexView'],  // Alternative
+            'events' => ['EventController', 'indexView'],
+            'events/index' => ['EventController', 'indexView'],
             'events/create' => ['EventController', 'createView'],
-            'events/delete/:id' => ['EventController', 'delete'],
             'events/view' => ['EventController', 'indexView'],
             'events/view/:id' => ['EventController', 'viewEvent'],
+            'events/edit/:id' => ['EventController', 'editView'],
             'tickets/book/:id' => ['TicketController', 'bookView'],
             'tickets/confirm/:id' => ['TicketController', 'confirmView'],
             'tickets/download/:id' => ['TicketController', 'download'],
-            'tickets/book/:id' => ['TicketController', 'bookView'],
-            'tickets/confirm/:id' => ['TicketController', 'confirmView'],
-            'tickets/download/:id' => ['TicketController', 'download'],
-            '' => ['AuthController', 'loginView'],               // Default route
+            'tickets/my-tickets' => ['TicketController', 'myTicketsView'],
+            'tickets/checkin' => ['TicketController', 'checkinView'],
         ],
         'POST' => [
             'auth/login' => ['AuthController', 'login'],
             'auth/register' => ['AuthController', 'register'],
             'events/create' => ['EventController', 'create'],
-                'tickets/book/:id' => ['TicketController', 'book'], 
+            'events/edit/:id' => ['EventController', 'edit'],
+            'events/delete/:id' => ['EventController', 'delete'],
+            'tickets/book/:id' => ['TicketController', 'book'],
+            'tickets/checkin' => ['TicketController', 'checkin'],
         ]
     ];
 
     public function __construct() {
-        // Load base Controller
-        require_once 'Controller.php';
+        require_once __DIR__ . '/Controller.php';
     }
 
     public function route(): void {
         $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $url = ltrim($this->sanitizeUrl($_GET['url'] ?? ''), '/');
+        if (!isset($this->routes[$requestMethod])) {
+            $this->notFound();
+        }
+
+        // Extract URL string from $_GET['url'] or $_SERVER['REQUEST_URI']
+        $rawUrl = $_GET['url'] ?? '';
+        if ($rawUrl === '') {
+            $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+            $path = parse_url($requestUri, PHP_URL_PATH) ?? '/';
+            
+            // Remove script directory prefix if hosted in subfolder
+            $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+            if ($scriptDir !== '/' && $scriptDir !== '\\' && strpos($path, $scriptDir) === 0) {
+                $path = substr($path, strlen($scriptDir));
+            }
+
+            // Remove /index.php prefix if present
+            $path = preg_replace('/^\/index\.php/', '', $path);
+            $rawUrl = $path;
+        }
+
+        $url = trim($this->sanitizeUrl($rawUrl), '/');
     
-        // 1. First check exact matches
+        // 1. Check exact matches
         if (isset($this->routes[$requestMethod][$url])) {
             [$controllerName, $method] = $this->routes[$requestMethod][$url];
             $this->callController($controllerName, $method);
             return;
         }
     
-        // 2. Check parameterized routes
+        // 2. Check parameterized routes (e.g. events/view/:id)
         foreach ($this->routes[$requestMethod] as $route => $handler) {
             if (strpos($route, ':') !== false) {
                 $pattern = preg_replace('/:[^\/]+/', '([^\/]+)', $route);
@@ -58,7 +80,7 @@ class Router {
             }
         }
     
-        // 3. Fallback to dynamic routing if enabled
+        // 3. Fallback dynamic routing
         $urlParts = explode('/', $url);
         if (count($urlParts) >= 2) {
             $controllerName = ucfirst($urlParts[0]) . 'Controller';
@@ -66,6 +88,12 @@ class Router {
             $params = array_slice($urlParts, 2);
             
             $this->callController($controllerName, $method, $params);
+            return;
+        }
+
+        // 4. Default home fallback for empty URL
+        if ($url === '') {
+            $this->callController('AuthController', 'loginView');
             return;
         }
         
@@ -82,7 +110,6 @@ class Router {
                 $controller = new $controllerName();
                 
                 if (method_exists($controller, $method)) {
-                    // Sanitize parameters before passing to controller
                     $sanitizedParams = array_map([$this, 'sanitizeInput'], $params);
                     call_user_func_array([$controller, $method], $sanitizedParams);
                     return;
@@ -100,7 +127,7 @@ class Router {
         if (file_exists($errorView)) {
             require_once $errorView;
         } else {
-            echo "404 Not Found";
+            echo "<h1>404 Not Found</h1><p>The requested page could not be found.</p>";
         }
         exit;
     }

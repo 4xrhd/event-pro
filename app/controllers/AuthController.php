@@ -1,61 +1,48 @@
 <?php
-require_once '../app/core/Controller.php';
+require_once __DIR__ . '/../core/Controller.php';
 
 class AuthController extends Controller {
-
-    
     public function loginView() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-    
-       
-    
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
+        $this->ensureSession();
+
         if (isset($_SESSION['user_id'])) {
-            header("Location: /index.php?url=events/index");
-            exit();
+            redirect('events');
         }
+
         $this->view('auth/login', [
-            'loginUrl' => '/auth/login',
-            'loginActionUrl' => '/auth/login'
+            'loginUrl' => url('auth/login'),
+            'loginActionUrl' => url('auth/login')
         ]);
     }
-    
-    
+
     public function registerView() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        $this->ensureSession();
+
+        if (isset($_SESSION['user_id'])) {
+            redirect('events');
         }
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
-        
+
         $this->view('auth/register', [
-            'registerActionUrl' => 'auth/register',
-            'loginUrl' => 'auth/login'
+            'registerActionUrl' => url('auth/register'),
+            'loginUrl' => url('auth/login')
         ]);
     }
 
     public function login() {
+        $this->ensureSession();
         $error = '';
-        
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-            
-            // Validate CSRF token
-            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
+            if (
+                !isset($_POST['csrf_token']) ||
+                !hash_equals($_SESSION['csrf_token'] ?? '', (string) $_POST['csrf_token'])
+            ) {
                 $error = "Invalid CSRF token";
                 $this->view('auth/login', ['error' => $error]);
                 return;
             }
 
-            // Input validation
-            $email = filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL);
+            $email = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
             $password = $_POST['password'] ?? '';
 
             if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -65,11 +52,14 @@ class AuthController extends Controller {
             } else {
                 $userModel = $this->model('User');
                 if ($userModel->login($email, $password)) {
-                    header("Location: /index.php?url=events/index");
+                    $redirectUrl = $_SESSION['redirect_after_login'] ?? url('events');
+                    unset($_SESSION['redirect_after_login']);
+
+                    header("Location: " . $redirectUrl);
                     exit();
-                } else {
-                    $error = "Invalid credentials.";
                 }
+
+                $error = "Invalid credentials.";
             }
         }
 
@@ -77,79 +67,87 @@ class AuthController extends Controller {
     }
 
     public function register() {
-    $error = '';
-     
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        
-        // Validate CSRF token
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
-            $error = "Invalid CSRF token";
-            $this->view('auth/register', ['error' => $error]);
-            return;
-        }
+        $this->ensureSession();
+        $error = '';
+        $name = '';
+        $email = '';
 
-        // Input validation and sanitization
-        $name = trim(filter_var($_POST['name'] ?? '', FILTER_SANITIZE_STRING));
-        $email = filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL);
-        $password = $_POST['password'] ?? '';
-        $confirm_password = $_POST['confirm_password'] ?? '';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (
+                !isset($_POST['csrf_token']) ||
+                !hash_equals($_SESSION['csrf_token'] ?? '', (string) $_POST['csrf_token'])
+            ) {
+                $error = "Invalid CSRF token";
+                $this->view('auth/register', ['error' => $error]);
+                return;
+            }
 
-        // Validate inputs
-        if (empty($name)) {
-            $error = "Please enter your full name";
-        } elseif (strlen($name) > 100) {
-            $error = "Name is too long";
-        } elseif (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $error = "Please enter a valid email address";
-        } elseif (empty($password) || strlen($password) < 8) {
-            $error = "Password must be at least 8 characters";
-        } elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password)) {
-            $error = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character";
-        } elseif ($password !== $confirm_password) {
-            $error = "Passwords do not match";
-        } else {
-            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-            $userModel = $this->model('User');
-            
-            // Make sure to pass parameters in correct order
-            if ($userModel->register($name, $email, $hashedPassword)) {
-                header("Location: /index.php?url=auth/login");
-                exit;
+            $name = trim(strip_tags($_POST['name'] ?? ''));
+            $email = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
+            $password = $_POST['password'] ?? '';
+            $confirmPassword = $_POST['confirm_password'] ?? '';
+
+            if (empty($name)) {
+                $error = "Please enter your full name";
+            } elseif (strlen($name) > 100) {
+                $error = "Name is too long";
+            } elseif (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $error = "Please enter a valid email address";
+            } elseif (empty($password) || strlen($password) < 8) {
+                $error = "Password must be at least 8 characters";
+            } elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password)) {
+                $error = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character";
+            } elseif ($password !== $confirmPassword) {
+                $error = "Passwords do not match";
             } else {
+                $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+                $userModel = $this->model('User');
+
+                if ($userModel->register($name, $email, $hashedPassword)) {
+                    redirect('auth/login');
+                }
+
                 $error = "Registration failed. Email may already be in use.";
             }
         }
+
+        $this->view('auth/register', [
+            'error' => $error,
+            'name' => $name,
+            'email' => $email,
+        ]);
     }
 
-    $this->view('auth/register', [
-        'error' => $error,
-        'name' => $name ?? '',
-        'email' => $email ?? ''
-    ]);
-}
-public function logout() {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    // Clear all session data
-    $_SESSION = [];
-    // Destroy the session cookie (optional but recommended)
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 42000,
-            $params["path"], $params["domain"],
-            $params["secure"], $params["httponly"]
-        );
-    }
-    // Destroy the session
-    session_destroy();
+    public function logout() {
+        $this->ensureSession();
 
-    // Redirect to login page or home
-    header("Location: /index.php?url=auth/login");
-    exit();
-}
+        $_SESSION = [];
 
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params["path"],
+                $params["domain"],
+                $params["secure"],
+                $params["httponly"]
+            );
+        }
+
+        session_destroy();
+
+        redirect('auth/login');
+    }
+
+    private function ensureSession() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+    }
 }
