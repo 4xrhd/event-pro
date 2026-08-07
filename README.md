@@ -4,46 +4,44 @@
 
 ## Overview
 
-EventPro is a **full-stack web application** designed to streamline event ticket sales, attendee management, and check-in processes. It enables event organizers to **create, manage, and sell tickets** while providing customers with a seamless booking experience.
+EventPro is a **full-stack web application** designed to streamline event ticket sales, attendee management, and check-in processes. It enables event organizers to **create, manage, and sell tickets** while providing customers with a seamless booking experience, built using a robust custom PHP MVC architecture.
+
+## Documentation
+
+Comprehensive project documentation is available in the [`docs/`](docs/) directory:
+- [Architectural Overview](docs/architecture.md)
+- [API & Routing Documentation](docs/api.md)
+- [Deployment Guide](docs/deployment.md)
+- [Developer Guide](docs/development.md)
 
 ## Key Features
 
 ✔ **User Roles & Authentication**  
-- Admin (Event creation, analytics)  
-- Customer (Ticket booking)  
-- Staff (QR validation)  
+- Admin / Organizer (Event creation, analytics)  
+- Customer (Ticket booking & management)  
+- Staff (QR code validation & check-in)  
 
 ✔ **Event Management**  
-- Create/edit events (title, date, venue, tickets)  
-- Dynamic pricing (Early Bird/VIP tickets)  
+- Create and edit events with dates, venues, and capacity limits  
+- Dynamic ticketing options  
 
-✔ **Ticket Booking & Payments**  
-- Stripe/PayPal integration  
-- Email tickets (PDF + QR code)  
+✔ **Ticket Booking & QR Code Generation**  
+- Instant reservation and secure ticket generation  
+- PDF ticket generation and QR code integration via TCPDF and phpqrcode  
 
 ✔ **QR Check-In System**  
-- Staff dashboard for real-time validation  
-
-✔ **Reporting & Analytics**  
-- Sales tracking, attendee reports  
+- Real-time ticket verification and attendee check-in scanner interface  
 
 ## Technology Stack
 
 | Category         | Technology                     |
 |------------------|--------------------------------|
 | Frontend         | HTML5, CSS3, JavaScript (AJAX) |
-| Backend          | PHP (Custom MVC)               |
-| Database         | MySQL                          |
-| Payment Gateway  | Stripe API                     |
+| Backend          | PHP 8.1+ (Custom MVC)          |
+| Database         | MySQL / MariaDB (via PDO)      |
 | QR Generation    | phpqrcode Library              |
-| PDF Tickets      | TCPDF                          |
-| Security         | CSRF Protection, Prepared Statements |
-
-## Target Audience
-
-🎯 **Event Organizers** (Conferences, Concerts, Workshops)  
-🎯 **Customers** (Ticket Buyers)  
-🎯 **Venue Staff** (Check-In Personnel)  
+| PDF Generation   | TCPDF                          |
+| Security         | Prepared Statements, Session-based Auth |
 
 ## Contributors
 
@@ -59,14 +57,24 @@ EventPro is a **full-stack web application** designed to streamline event ticket
 
 ## Getting Started
 
-1. Clone the repository
-2. Set up the database (MySQL)
-3. Configure the environment variables
-4. Run the application on a PHP server
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/4xrhd/event-pro.git
+   cd event-pro
+   ```
 
-```bash
-$ php -S 127.0.0.1:8080 -t public
-```
+2. **Install Composer dependencies**
+   ```bash
+   composer install
+   ```
+
+3. **Set up the database**
+   Import `database/schema.sql` into your MySQL/MariaDB database and configure connection settings in `config/database.php`.
+
+4. **Run the local development server**
+   ```bash
+   php -S 127.0.0.1:8080 -t public
+   ```
 
 ---
 
